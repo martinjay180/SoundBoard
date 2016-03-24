@@ -14,7 +14,7 @@
             .factory('socket', function ($rootScope) {
                 var socket = io.connect();
                 return {
-                    init: function() {
+                    init: function () {
                         socket.removeAllListeners();
                     },
                     on: function (eventName, callback) {
@@ -40,18 +40,18 @@
             .controller("ClientCtrl", function ($scope, socket) {
                 $scope.title = "Test";
                 $scope.playedSounds = [];
-            
+
                 $scope.sounds = [{
                     name: "A",
                     id: "01 Murder_Police.m4a"
                 }, {
                     name: "B",
-                    id: "b"
+                    id: "b.aiff"
                 }, {
                     name: "C",
                     id: "c"
                 }];
-            
+
                 $scope.playSound = function (sound) {
                     socket.emit("play sound", sound.id)
                 }
@@ -59,7 +59,7 @@
                 socket.on('data', function (msg) {
                     $scope.userId = msg;
                 });
-            
+
                 socket.on('play sound', function (msg) {
                     $scope.playedSounds.push(msg);
                 });
@@ -70,6 +70,9 @@
 <body ng-app="SoundBoard" ng-cloak>
     <div ng-controller="ClientCtrl" layout="column">
         <md-content>
+            <md-toolbar>
+                <span><h2>SoundBoard</h2></span>
+            </md-toolbar>
             <md-list flex>
                 <md-list-item ng-repeat="sound in sounds" ng-click="playSound(sound)">
                     {{sound.name}}
