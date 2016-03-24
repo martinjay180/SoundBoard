@@ -1,0 +1,24 @@
+{
+  "name": "soundboard",
+  "version": "1.0.0",
+  "description": "A sound board that uses sockets",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Martin Jay",
+  "license": "ISC",
+  "devDependencies": {
+    "play-sound": "0.0.7"
+  },
+  "dependencies": {
+    "angular": "^1.5.0",
+    "angular-animate": "^1.5.0",
+    "angular-aria": "^1.5.0",
+    "angular-material": "^1.0.6",
+    "angular-messages": "^1.5.0",
+    "express": "^4.13.4",
+    "general-js": "^1.0.2",
+    "socket.io": "^1.4.5"
+  }
+}

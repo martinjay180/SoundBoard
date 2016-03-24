@@ -1,0 +1,89 @@
+<html lang="en">
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/angular_material/1.0.0/angular-material.min.css">
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-animate.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-aria.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-messages.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angular_material/1.0.0/angular-material.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        angular.module('SoundBoard', ['ngMaterial'])
+            .factory('socket', function ($rootScope) {
+                var socket = io.connect();
+                return {
+                    init: function() {
+                        socket.removeAllListeners();
+                    },
+                    on: function (eventName, callback) {
+                        socket.on(eventName, function () {
+                            var args = arguments;
+                            $rootScope.$apply(function () {
+                                callback.apply(socket, args);
+                            });
+                        });
+                    },
+                    emit: function (eventName, data, callback) {
+                        socket.emit(eventName, data, function () {
+                            var args = arguments;
+                            $rootScope.$apply(function () {
+                                if (callback) {
+                                    callback.apply(socket, args);
+                                }
+                            });
+                        })
+                    }
+                };
+            })
+            .controller("ClientCtrl", function ($scope, socket) {
+                $scope.title = "Test";
+                $scope.playedSounds = [];
+            
+                $scope.sounds = [{
+                    name: "A",
+                    id: "01 Murder_Police.m4a"
+                }, {
+                    name: "B",
+                    id: "b"
+                }, {
+                    name: "C",
+                    id: "c"
+                }];
+            
+                $scope.playSound = function (sound) {
+                    socket.emit("play sound", sound.id)
+                }
+
+                socket.on('data', function (msg) {
+                    $scope.userId = msg;
+                });
+            
+                socket.on('play sound', function (msg) {
+                    $scope.playedSounds.push(msg);
+                });
+            });
+    </script>
+</head>
+
+<body ng-app="SoundBoard" ng-cloak>
+    <div ng-controller="ClientCtrl" layout="column">
+        <md-content>
+            <md-list flex>
+                <md-list-item ng-repeat="sound in sounds" ng-click="playSound(sound)">
+                    {{sound.name}}
+                </md-list-item>
+            </md-list>
+        </md-content>
+        <md-content>
+            <md-list flex>
+                <md-list-item ng-repeat="playedSound in playedSounds">
+                    {{playedSound.id}} by {{playedSound.userId}}
+                </md-list-item>
+            </md-list>
+        </md-content>
+    </div>
+</body>
+
+</html>
