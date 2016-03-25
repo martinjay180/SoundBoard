@@ -3,6 +3,7 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/angular_material/1.0.0/angular-material.min.css">
+    <link rel="stylesheet" href="/bower_components/font-awesome/css/font-awesome.css">
     <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.js"></script>
     <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-animate.min.js"></script>
     <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-aria.min.js"></script>
@@ -41,23 +42,16 @@
                 $scope.title = "Test";
                 $scope.playedSounds = [];
 
-                $scope.sounds = [{
-                    name: "A",
-                    id: "01 Murder_Police.m4a"
-                }, {
-                    name: "B",
-                    id: "b.aiff"
-                }, {
-                    name: "C",
-                    id: "c"
-                }];
-
                 $scope.playSound = function (sound) {
                     socket.emit("play sound", sound.id)
                 }
 
                 socket.on('data', function (msg) {
                     $scope.userId = msg;
+                });
+            
+                socket.on('sounds', function(sounds){
+                    $scope.sounds = sounds;
                 });
 
                 socket.on('play sound', function (msg) {
@@ -75,7 +69,8 @@
             </md-toolbar>
             <md-list flex>
                 <md-list-item ng-repeat="sound in sounds" ng-click="playSound(sound)">
-                    {{sound.name}}
+                    {{sound.path}}
+                    <md-button ng-if="sound.playing"><i class="fa fa-pause-circle"></i></md-button>
                 </md-list-item>
             </md-list>
         </md-content>

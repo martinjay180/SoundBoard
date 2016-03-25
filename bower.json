@@ -1,0 +1,22 @@
+{
+  "name": "SoundBoard",
+  "main": "index.js",
+  "version": "0.0.0",
+  "homepage": "https://github.com/martinjay180/SoundBoard",
+  "authors": [
+    "Martin Jay <martinjay180@gmail.com>"
+  ],
+  "description": "",
+  "moduleType": [],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "font-awesome": "fontawesome#~4.5.0"
+  }
+}
