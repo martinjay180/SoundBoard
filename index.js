@@ -12,14 +12,13 @@ var sounds;
 function loadSounds() {
     sounds = fs.readdirSync("sounds");
     sounds = _.map(sounds, function (sound, index) {
-        if (!sound.startsWith(".")) {
-            return {
-                id: index,
-                path: sound,
-                playing: false,
-                playCount: 0
-            };
-        }
+        return {
+            id: index,
+            path: sound,
+            playing: false,
+            playCount: 0
+        };
+
     });
     sounds = _.omit(sounds, _.isUndefined)
 }
