@@ -7,27 +7,40 @@ var io = require('socket.io')(http);
 require('general-js');
 var _ = require('underscore');
 
-var sounds = fs.readdirSync("sounds");
-sounds = _.map(sounds, function (sound, index) {
-    if (!sound.startsWith(".")) {
-        return {
-            id: index,
-            path: sound,
-            playing: false
-        };
-    }
-});
-sounds = _.omit(sounds, _.isUndefined)
+var sounds;
+
+function loadSounds() {
+    sounds = fs.readdirSync("sounds");
+    sounds = _.map(sounds, function (sound, index) {
+        if (!sound.startsWith(".")) {
+            return {
+                id: index,
+                path: sound,
+                playing: false,
+                playCount: 0
+            };
+        }
+    });
+    sounds = _.omit(sounds, _.isUndefined)
+}
+
+loadSounds();
 
 app.use('/bower_components', express.static(__dirname + '/bower_components'));
 
 app.get('/', function (req, res) {
-    res.sendFile(__dirname + '/client.html');   
+    res.sendFile(__dirname + '/client.html');
 });
 
 io.on('connection', function (socket) {
     socket.emit('data', socket.id);
     socket.emit('sounds', sounds);
+
+    socket.on('reload', function () {
+        sfx.stop();
+        loadSounds();
+        socket.emit('sounds', sounds);
+    });
 
     socket.on('play sound', function (soundId) {
         var sound = _.findWhere(sounds, {
@@ -37,7 +50,8 @@ io.on('connection', function (socket) {
         if (sound.playing) {
             sfx.stop(path);
         } else {
-            sfx.play(path, function(a, b, c){
+            sound.playCount++;
+            sfx.play(path, function () {
                 soundFinished(socket, sound);
             });
         }
@@ -47,7 +61,7 @@ io.on('connection', function (socket) {
 
 });
 
-function soundFinished(socket, sound){
+function soundFinished(socket, sound) {
     sound.playing = false;
     socket.emit('sounds', sounds);
 }

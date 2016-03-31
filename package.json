@@ -16,10 +16,11 @@
     "angular-animate": "^1.5.0",
     "angular-aria": "^1.5.0",
     "angular-material": "^1.0.6",
+    "angular-material-icons": "^0.7.0",
     "angular-messages": "^1.5.0",
     "express": "^4.13.4",
     "fontawesome": "^4.5.0",
-    "general-js": "^1.0.2",
+    "general-js": "^1.0.3",
     "sfx": "^0.1.1",
     "socket.io": "^1.4.5",
     "underscore": "^1.8.3"

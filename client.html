@@ -46,11 +46,15 @@
                     socket.emit("play sound", sound.id)
                 }
 
+                $scope.reload = function () {
+                    socket.emit("reload");
+                }
+
                 socket.on('data', function (msg) {
                     $scope.userId = msg;
                 });
-            
-                socket.on('sounds', function(sounds){
+
+                socket.on('sounds', function (sounds) {
                     $scope.sounds = sounds;
                 });
 
@@ -59,25 +63,51 @@
                 });
             });
     </script>
+    <style>
+        h2 {
+            padding-left: 20px;
+        }
+        
+        md-list-item md-button {
+            float: right;
+        }
+        
+        .md-list-item-text {
+            padding-left: 20px;
+        }
+    </style>
 </head>
 
 <body ng-app="SoundBoard" ng-cloak>
     <div ng-controller="ClientCtrl" layout="column">
         <md-content>
-            <md-toolbar>
-                <span><h2>SoundBoard</h2></span>
+            <md-toolbar md-scroll-shrink="true">
+                <div class="md-toolbar-tools">
+                    <h2><span>Sound Board</span></h2>
+                    <span flex></span>
+                    <md-button class="md-icon-button" aria-label="Favorite">
+                        <md-icon md-svg-icon="img/icons/favorite.svg" style="color: greenyellow;"></md-icon>
+                    </md-button>
+                    <md-button class="md-icon-button" aria-label="Reload" ng-click="reload()">
+                        <i class="fa fa-refresh fa-2x"></i>
+                    </md-button>
+                </div>
             </md-toolbar>
             <md-list flex>
                 <md-list-item ng-repeat="sound in sounds" ng-click="playSound(sound)">
-                    {{sound.path}}
-                    <md-button ng-if="sound.playing"><i class="fa fa-pause-circle"></i></md-button>
-                </md-list-item>
-            </md-list>
-        </md-content>
-        <md-content>
-            <md-list flex>
-                <md-list-item ng-repeat="playedSound in playedSounds">
-                    {{playedSound.id}} by {{playedSound.userId}}
+                    <div class="md-primary">
+                        <i class="fa fa-check-circle-o fa-3x" ng-if="sound.playCount && !sound.playing"></i>
+                        <i class="fa fa-cog fa-3x fa-spin" ng-class="{'fa-spin': sound.playing}" ng-show="sound.playing"></i>
+                        <i class="fa fa-circle-o fa-3x" ng-if="!sound.playCount"></i>
+                    </div>
+                    <div class="md-list-item-text">
+                        <h3>{{sound.path}}</h3>
+                        <p>Play Count: {{sound.playCount}}</p>
+                    </div>
+                    <md-button class="md-secondary" ng-if="sound.playing">
+                        <i class="fa fa-pause-circle fa-5x"></i>
+                    </md-button>
+                    <md-divider ng-if="!$last"></md-divider>
                 </md-list-item>
             </md-list>
         </md-content>

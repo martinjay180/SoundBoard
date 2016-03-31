@@ -17,6 +17,7 @@
     "tests"
   ],
   "dependencies": {
-    "font-awesome": "fontawesome#~4.5.0"
+    "font-awesome": "fontawesome#~4.5.0",
+    "material-design-icons": "~2.2.3"
   }
 }
