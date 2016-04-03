@@ -7,6 +7,7 @@ var io = require('socket.io')(http);
 require('general-js');
 var _ = require('underscore');
 
+sfx.config.play.command = 'omxplayer';
 var sounds;
 
 function loadSounds() {
