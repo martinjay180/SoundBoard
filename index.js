@@ -9,8 +9,9 @@ var _ = require('underscore');
 
 var sounds;
 
+sfx.config.play.command = 'omxplayer';
 function loadSounds() {
-    sounds = fs.readdirSync("sounds");
+    sounds = fs.readdirSync("/home/pi/SoundBoard/sounds");
     sounds = _.map(sounds, function (sound, index) {
         return {
             id: index,
@@ -45,7 +46,7 @@ io.on('connection', function (socket) {
         var sound = _.findWhere(sounds, {
             id: soundId
         });
-        var path = "./{0}/{1}".format("sounds", sound.path);
+        var path = "/home/pi/SoundBoard/{0}/{1}".format("sounds", sound.path);
         if (sound.playing) {
             sfx.stop(path);
         } else {
