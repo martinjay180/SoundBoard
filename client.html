@@ -2,7 +2,7 @@
 
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="/bower_components/angular-material/angular-material.css">
+    <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/angular_material/1.0.0/angular-material.min.css">
     <link rel="stylesheet" href="/bower_components/font-awesome/css/font-awesome.css">
     <script src="/bower_components/angular/angular.js"></script>
     <script src="/bower_components/angular-animate/angular-animate.min.js"></script>
@@ -38,12 +38,35 @@
                     }
                 };
             })
-            .controller("ClientCtrl", function ($scope, socket) {
+            .controller("ClientCtrl", function ($scope, socket, $mdSidenav) {
+                $scope.editMode = false;
                 $scope.title = "Test";
                 $scope.playedSounds = [];
+                $scope.scanning = false;
 
-                $scope.playSound = function (sound) {
-                    socket.emit("play sound", sound.id)
+                $scope.playSound = function ($event, sound) {
+                    if (!$scope.editMode) {
+                        socket.emit("play sound", sound.id)
+                        console.log("position", $event);
+                        window.scrollTo(0, $event.pageY - (window.screen.availHeight / 2) + (125 / 2));
+                    }
+                }
+
+                $scope.scan = function () {
+                    $scope.scanning = true;
+                    socket.emit("scan");
+                    alert("scanning");
+                }
+
+                $scope.toggleMenu = function () {
+                    $mdSidenav("left").toggle();
+                }
+
+                $scope.toggleEditMode = function () {
+                    if($scope.editMode){
+                        socket.emit("save", $scope.sounds);
+                    }
+                    $scope.editMode = !$scope.editMode;
                 }
 
                 $scope.reload = function () {
@@ -58,9 +81,23 @@
                     $scope.sounds = sounds;
                 });
 
+                socket.on('scan complete', function (sounds) {
+                    $scope.sounds = sounds;
+                    $scope.scanning = false;
+                    $mdSidenav('left').close();
+                });
+
                 socket.on('play sound', function (msg) {
                     $scope.playedSounds.push(msg);
                 });
+            })
+            .controller('LeftCtrl', function ($scope, $timeout, $mdSidenav, $log) {
+                $scope.close = function () {
+                    $mdSidenav('left').close()
+                        .then(function () {
+                            $log.debug("close LEFT is done");
+                        });
+                };
             });
     </script>
     <style>
@@ -74,19 +111,42 @@
         
         .md-list-item-text {
             padding-left: 20px;
+            width: 100%;
         }
     </style>
 </head>
 
 <body ng-app="SoundBoard" ng-cloak>
     <div ng-controller="ClientCtrl" layout="column">
+        <md-sidenav class="md-sidenav-left" md-component-id="left" md-disable-backdrop md-whiteframe="4">
+            <md-toolbar class="md-theme-indigo" ng-controller="LeftCtrl">
+                <div class="md-toolbar-tools">
+                    <h1 class="md-toolbar-tools">Options</h1>
+                    <md-button ng-click="close()" class="md-secondary">
+                        <i class="fa fa-times fa-2x"></i>
+                    </md-button>
+                </div>
+            </md-toolbar>
+            <md-content layout-padding>
+                <md-button ng-click="scan()" class="md-primary" hide-gt-md>
+                    Scan For New Media
+                </md-button>
+                <md-progress-linear md-mode="indeterminate" ng-show="scanning"></md-progress-linear>
+            </md-content>
+        </md-sidenav>
         <md-content>
             <md-toolbar md-scroll-shrink="true">
                 <div class="md-toolbar-tools">
+                    <md-button class="md-icon-button" aria-label="Reload" ng-click="toggleMenu()">
+                        <i class="fa fa-bars fa-2x"></i>
+                    </md-button>
                     <h2><span>Sound Board</span></h2>
                     <span flex></span>
                     <md-button class="md-icon-button" aria-label="Favorite">
                         <md-icon md-svg-icon="img/icons/favorite.svg" style="color: greenyellow;"></md-icon>
+                    </md-button>
+                    <md-button class="md-icon-button" aria-label="Reload" ng-click="toggleEditMode()">
+                        <i class="fa fa-pencil-square-o fa-2x"></i>
                     </md-button>
                     <md-button class="md-icon-button" aria-label="Reload" ng-click="reload()">
                         <i class="fa fa-refresh fa-2x"></i>
@@ -94,7 +154,7 @@
                 </div>
             </md-toolbar>
             <md-list flex>
-                <md-list-item ng-repeat="sound in sounds" ng-click="playSound(sound)">
+                <md-list-item ng-repeat="sound in sounds" ng-click="playSound($event, sound)">
                     <div class="md-primary">
                         <i class="fa fa-check-circle-o fa-3x" ng-if="sound.playCount && !sound.playing"></i>
                         <i class="fa fa-cog fa-3x fa-spin" ng-class="{'fa-spin': sound.playing}" ng-show="sound.playing"></i>
@@ -102,7 +162,9 @@
                     </div>
                     <div class="md-list-item-text">
                         <h3>{{sound.path}}</h3>
-                        <p>Play Count: {{sound.playCount}}</p>
+                        <p ng-show="!editMode">Volume: {{sound.volume}} Play Count: {{sound.playCount}}</p>
+                        <md-slider flex min="0" max="100" ng-model="sound.volume" ng-show="editMode">
+                        </md-slider>
                     </div>
                     <md-button class="md-secondary" ng-if="sound.playing">
                         <i class="fa fa-pause-circle fa-5x"></i>

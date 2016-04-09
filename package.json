@@ -21,6 +21,7 @@
     "express": "^4.13.4",
     "fontawesome": "^4.5.0",
     "general-js": "^1.0.3",
+    "jsonfile": "^2.2.3",
     "sfx": "^0.1.1",
     "socket.io": "^1.4.5",
     "underscore": "^1.8.3"

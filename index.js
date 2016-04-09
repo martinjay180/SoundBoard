@@ -1,4 +1,4 @@
-const fs = require('fs');
+var sbServer = require('./lib/SoundBoard.js')
 var sfx = require("sfx");
 var express = require('express');
 var app = express();
@@ -7,25 +7,14 @@ var io = require('socket.io')(http);
 require('general-js');
 var _ = require('underscore');
 
-sfx.config.play.command = 'omxplayer';
-var sounds;
+sbServer.test();
+var sounds = sbServer.loadJson();
 
 sfx.config.play.command = 'omxplayer';
-function loadSounds() {
-    sounds = fs.readdirSync("/home/pi/SoundBoard/sounds");
-    sounds = _.map(sounds, function (sound, index) {
-        return {
-            id: index,
-            path: sound,
-            playing: false,
-            playCount: 0
-        };
 
-    });
-    sounds = _.omit(sounds, _.isUndefined)
-}
 
-loadSounds();
+
+sfx.config.play.command = 'omxplayer';
 
 app.use('/bower_components', express.static(__dirname + '/bower_components'));
 
@@ -36,6 +25,17 @@ app.get('/', function (req, res) {
 io.on('connection', function (socket) {
     socket.emit('data', socket.id);
     socket.emit('sounds', sounds);
+    
+    socket.on("scan", function(){
+        sounds = sbServer.scan();
+        socket.emit('scan complete', sounds);
+        sbServer.saveJson(sounds);
+    });
+    
+    socket.on("save", function(sounds){
+        sbServer.saveJson(sounds);
+        socket.emit("sounds", sounds);
+    })
 
     socket.on('reload', function () {
         sfx.stop();
@@ -47,7 +47,7 @@ io.on('connection', function (socket) {
         var sound = _.findWhere(sounds, {
             id: soundId
         });
-        var path = "/home/pi/SoundBoard/{0}/{1}".format("sounds", sound.path);
+        var path = "{0}/{1}".format("sounds", sound.path);
         if (sound.playing) {
             sfx.stop(path);
         } else {
